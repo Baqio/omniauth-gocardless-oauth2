@@ -34,14 +34,7 @@ module OmniAuth
         hash.merge!('expires' => access_token.expires?)
         hash
       end
-		
-		def redirect_params
-        if options.key?(:callback_path) || OmniAuth.config.full_host
-          {:redirect_uri => callback_url}
-        else
-          {}
-        end
-      end
+	
 
       # NOTE: We call redirect_params AFTER super in these methods intentionally
       # the OAuth2 strategy uses the authorize_params and token_params methods
