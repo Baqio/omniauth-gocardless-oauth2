@@ -4,13 +4,14 @@ module OmniAuth
 	module Strategies
 		class Gocardless < OmniAuth::Strategies::OAuth2
 
-			option :name, "gocardless"
+			option :name, :gocardless
 
 			option :client_options, {
 				:site => "https://connect.gocardless.com",
 		        :authorize_url => '/oauth/authorize',
 		        :token_url => '/oauth/access_token'
 			}
+		
 
 			uid { access_token.params['organisation_id'] }
 
