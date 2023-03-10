@@ -35,6 +35,52 @@ module OmniAuth
         hash
       end
 		
+		def redirect_params
+        if options.key?(:callback_path) || OmniAuth.config.full_host
+          {:redirect_uri => callback_url}
+        else
+          {}
+        end
+      end
+
+      # NOTE: We call redirect_params AFTER super in these methods intentionally
+      # the OAuth2 strategy uses the authorize_params and token_params methods
+      # to set up some state for testing that we need in redirect_params
+
+      def authorize_params
+        params = super
+        params = params.merge(request_params) unless OmniAuth.config.test_mode
+        redirect_params.merge(params)
+      end
+
+      def token_params
+       params = super.to_hash(:symbolize_keys => true) \
+          .merge(:headers => { 'Authorization' => "Bearer #{client.secret}" })
+
+        redirect_params.merge(params)
+      end
+
+      def callback_url
+        full_host + script_name + callback_path
+      end
+
+      def request_phase
+        redirect client.auth_code.authorize_url(authorize_params)
+      end
+
+      def build_access_token
+        verifier = request.params['code']
+        client.auth_code.get_token(verifier, token_params)
+      end
+
+      def request_params
+        request.params.except(*request_blacklisted_params)
+      end
+
+      def request_blacklisted_params
+        %w(_method)
+      end
+		
 		
 		end
 	end
